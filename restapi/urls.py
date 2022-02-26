@@ -8,6 +8,7 @@ urlpatterns = [
     path('services/<int:id>/change', views.ServicesAreaViewSet.as_view()),
     path('polygons', views.PolygonsViewSet.as_view()),
     path('polygons/<int:id>', views.PolygonsViewSet.as_view()),
+    path('test/', views.test_view, name="test_view"),
 
     # for testing
     #path('test/', views.test_view, name="test_view")

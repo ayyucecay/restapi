@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-
+from django.db import connection
 from django.shortcuts import render, get_object_or_404
 
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
@@ -26,9 +26,67 @@ from restapi.serializers import ServicesAreaSerializer, PolygonsSerializer
 from restapi.models import ServicesArea, Polygon
 
 
+def test_view(request):
+
+
+    query = "SELECT * FROM ServicesArea WHERE service_id = {}".format(1)
+#    query = "select student_name as full_name, student_email as email from students where branch_id = 11"
+    service_email = pd.read_sql(query, connection)
+    service_email_result = service_email.to_dict('records')
+    service_email_json = json.dumps(service_email_result)
+    parse_json = json.loads(service_email_json)
+    print(parse_json)
+
+
+    for service in parse_json:
+
+        service_info = {
+            "name": service["name"],
+            "email": service["email"],
+            "phone_number": service["phonenumber"],
+            "language": service["language"],
+            "currency": service["currency"]
+        }
+        try:
+            requests.post('http://localhost:8000/services', data=service_info)
+            #StudentsView.post(self, student_info)
+        except ApiClientError as error:
+            print("Error: {}".format(error.text))
+
+    query = "SELECT * FROM Polygon WHERE services = {}".format(1)
+    polygon = pd.read_sql(query, connection)
+    polygon_result = polygon.to_dict('records')
+    polygon_json = json.dumps(polygon_result)
+    parse_json2 = json.loads(polygon_json)
+    print(parse_json2)
+
+    for polygon in parse_json2:
+
+        polygon_info = {
+            "name": polygon["name"],
+            "price": polygon["price"],
+            "geojson": polygon["geojson"],
+            "services": polygon["services"],
+        }
+        try:
+            requests.post('http://localhost:8000/polygons', data=polygon_info)
+            #StudentsView.post(self, student_info)
+        except ApiClientError as error:
+            print("Error: {}".format(error.text))
+            
+
+    data = {}
+#    return Response({"status": "success", "data": serializer.data})
+    return render(request, "test_view.html", data)
+
+
+
+
+
 
 
 class ServicesAreaViewSet(APIView):
+
 
     def post(self,request):
         serializer = ServicesAreaSerializer(data=request.data)
